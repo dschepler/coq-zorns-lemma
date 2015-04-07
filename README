@@ -10,6 +10,9 @@ Classical_Wf.v - proofs of the classical equivalence of wellfoundedness,
                  the minimal element property, and the descending sequence
                  property
 
+Complement_facts.v - facts regarding the set complement operator (e.g.
+                     de Morgan's laws)
+
 CSB.v - the Cantor-Schroeder-Bernstein theorem
 
 DecidableDec.v - classic_dec: forall P:Prop, {P} + {~P}.
