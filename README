@@ -25,6 +25,9 @@ ImageImplicit.v - same for the standard library's Sets/Image
 Relation_Definitions_Implicit.v - same for the standard library's
                                   Relation_Definitions
 
+EnsemblesInstances.v - inclusion relation forms partial order on P(X);
+                       properness for set operations
+
 EnsemblesSpec.v - defines a notation for e.g. [ n:nat | n > 5 /\ even n ] :
                   Ensemble nat.
 

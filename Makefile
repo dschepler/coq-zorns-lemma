@@ -96,6 +96,7 @@ VFILES:=ZornsLemma.v\
   Families.v\
   EnsemblesUtf8.v\
   EnsemblesSpec.v\
+  EnsemblesInstances.v\
   EnsemblesImplicit.v\
   DependentTypeChoice.v\
   DecidableDec.v\
