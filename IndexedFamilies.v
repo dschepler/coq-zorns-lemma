@@ -22,30 +22,46 @@ End IndexedFamilies.
 
 Section IndexedFamilyFacts.
 
+Lemma IndexedUnion_vee : forall {A T:Type} (F:IndexedFamily A T) (a:A),
+  Included (F a) (IndexedUnion F).
+Proof.
+intros; red; intros. exists a; trivial.
+Qed.
+
+Lemma IndexedUnion_minimal : forall {A T:Type} (F:IndexedFamily A T)
+  (S:Ensemble T),
+  (forall a:A, Included (F a) S) -> Included (IndexedUnion F) S.
+Proof.
+intros; red; intros. destruct H0 as [a]. eapply H; eassumption.
+Qed.
+
+Lemma IndexedIntersection_wedge : forall {A T:Type} (F:IndexedFamily A T)
+  (a:A), Included (IndexedIntersection F) (F a).
+Proof.
+intros; red; intros. destruct H. trivial.
+Qed.
+
+Lemma IndexedIntersection_maximal : forall {A T:Type} (F:IndexedFamily A T)
+  (S:Ensemble T),
+  (forall a:A, Included S (F a)) -> Included S (IndexedIntersection F).
+Proof.
+intros; red; intros. constructor. intros. eapply H; eassumption.
+Qed.
+
 (* unions and intersections over subsets of the index set *)
 Lemma sub_indexed_union: forall {A B T:Type} (f:A->B)
   (F:IndexedFamily B T),
-  let subF := (fun a:A => F (f a)) in
-    Included (IndexedUnion subF) (IndexedUnion F).
+  Included (IndexedUnion (fun a:A => F (f a))) (IndexedUnion F).
 Proof.
-unfold Included.
-intros.
-destruct H.
-apply indexed_union_intro with (f a).
-assumption.
+intros; apply IndexedUnion_minimal. intros. apply IndexedUnion_vee.
 Qed.
 
 Lemma sub_indexed_intersection: forall {A B T:Type} (f:A->B)
   (F:IndexedFamily B T),
-  let subF := (fun a:A => F (f a)) in
-    Included (IndexedIntersection F) (IndexedIntersection subF).
+  Included (IndexedIntersection F) (IndexedIntersection (fun a:A => F (f a))).
 Proof.
-unfold Included.
-intros.
-constructor.
-destruct H.
-intro.
-apply H.
+intros; apply IndexedIntersection_maximal. intros.
+apply IndexedIntersection_wedge.
 Qed.
 
 Lemma empty_indexed_intersection: forall {T:Type}
@@ -53,22 +69,18 @@ Lemma empty_indexed_intersection: forall {T:Type}
   IndexedIntersection F = Full_set.
 Proof.
 intros.
-apply Extensionality_Ensembles; red; split; red; intros;
-  auto with sets.
-constructor.
-constructor.
-destruct a.
+apply Extensionality_Ensembles; split.
++ constructor.
++ apply IndexedIntersection_maximal. destruct a.
 Qed.
 
 Lemma empty_indexed_union: forall {T:Type}
   (F:IndexedFamily False T),
   IndexedUnion F = Empty_set.
 Proof.
-intros.
-apply Extensionality_Ensembles; red; split; red; intros.
-destruct H.
-destruct a.
-destruct H.
+intros. apply Extensionality_Ensembles; split.
++ apply IndexedUnion_minimal. destruct a.
++ auto with sets.
 Qed.
 
 End IndexedFamilyFacts.
@@ -85,45 +97,20 @@ Definition ImageFamily : Family T :=
 
 Lemma indexed_to_family_union: IndexedUnion F = FamilyUnion ImageFamily.
 Proof.
-apply Extensionality_Ensembles.
-unfold Same_set.
-unfold Included.
-intuition.
-destruct H.
-apply family_union_intro with (F a).
-apply Im_intro with a.
-constructor.
-reflexivity.
-assumption.
-
-destruct H.
-destruct H.
-apply indexed_union_intro with x0.
-rewrite <- H1.
-assumption.
+apply Extensionality_Ensembles; split.
++ apply IndexedUnion_minimal. intros. apply FamilyUnion_vee.
+  exists a; trivial. constructor.
++ apply FamilyUnion_minimal. destruct 1; subst. apply IndexedUnion_vee.
 Qed.
 
 Lemma indexed_to_family_intersection:
   IndexedIntersection F = FamilyIntersection ImageFamily.
 Proof.
-apply Extensionality_Ensembles.
-unfold Same_set.
-unfold Included.
-intuition.
-constructor.
-intros.
-destruct H.
-destruct H0.
-rewrite H1.
-apply H.
-
-constructor.
-intro.
-destruct H.
-apply H.
-apply Im_intro with a.
-constructor.
-reflexivity.
+apply Extensionality_Ensembles; split.
++ apply FamilyIntersection_maximal. intros. destruct H; subst.
+  apply IndexedIntersection_wedge.
++ apply IndexedIntersection_maximal. intros. apply FamilyIntersection_wedge.
+  exists a; trivial. constructor.
 Qed.
 
 End IndexedFamilyToFamily.
