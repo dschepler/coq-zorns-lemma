@@ -1,20 +1,17 @@
 Require Export Ensembles.
 Require Import EnsemblesImplicit.
 Require Export EnsemblesSpec.
+Require Export Morphisms.
+Require Import FunctionalExtensionality.
 
 Definition inverse_image {X Y:Type} (f:X->Y) (T:Ensemble Y) : Ensemble X :=
   [ x:X | In T (f x) ].
 Hint Unfold inverse_image : sets.
 
-Lemma inverse_image_increasing: forall {X Y:Type} (f:X->Y)
-  (T1 T2:Ensemble Y), Included T1 T2 ->
-  Included (inverse_image f T1) (inverse_image f T2).
+Instance inverse_image_increasing : forall {X Y:Type} (f:X->Y),
+  Proper (Included ++> Included) (inverse_image f).
 Proof.
-intros.
-red; intros.
-destruct H0.
-constructor.
-auto.
+intros. intros T1 T2 ?. red; intros. destruct H0. constructor. auto.
 Qed.
 
 Lemma inverse_image_empty: forall {X Y:Type} (f:X->Y),
@@ -82,18 +79,18 @@ contradiction H.
 constructor; trivial.
 Qed.
 
-Lemma inverse_image_composition: forall {X Y Z:Type} (f:Y->Z) (g:X->Y)
-  (U:Ensemble Z), inverse_image (fun x:X => f (g x)) U =
-  inverse_image g (inverse_image f U).
-Proof.
-intros.
-apply Extensionality_Ensembles; split; red; intros.
-constructor; constructor.
-destruct H.
-assumption.
+Definition composition {Y Z:Type} (f:Y->Z) {X:Type} (g:X->Y) : X->Z :=
+fun x => f (g x).
 
-destruct H; inversion H.
-constructor; trivial.
+Infix "○" := composition (left associativity, at level 25).
+
+Lemma inverse_image_composition: forall {Y Z:Type} (f:Y->Z) {X:Type} (g:X->Y),
+  inverse_image (f ○ g) = inverse_image g ○ inverse_image f.
+Proof.
+intros. extensionality T; unfold composition.
+apply Extensionality_Ensembles; split; red; intros.
++ constructor; constructor. destruct H. assumption.
++ constructor. destruct H. destruct H. assumption.
 Qed.
 
 Hint Resolve @inverse_image_increasing : sets.
